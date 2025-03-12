@@ -23,7 +23,8 @@ This document outlines the coding standards and contribution guidelines for the 
     ```
 - Install project requirements
     ```
-    pip install -r requirements.txt
+    cd requirements
+    pip install -r base.txt
     ```
 - Run project
     ```
