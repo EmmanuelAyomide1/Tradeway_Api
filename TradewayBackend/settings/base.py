@@ -31,16 +31,19 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", ".onrender.com","127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", ".onrender.com","127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", ".vercel.app", "now.sh", "127.0.0.1"]
 # RENDER_EXTERNAL_HOSTNAME = config("RENDER_EXTERNAL_HOSTNAME")
 # ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME) if RENDER_EXTERNAL_HOSTNAME else []
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:5173"
     # "https://frontend.app",
 ]
 CORS_ORIGIN_WHITELIST = (
     "http://localhost:3000",
+    "http://localhost:5173",
     "http://localhost:8000",
     # "https://frontend.app",
 )
@@ -48,6 +51,7 @@ CORS_ORIGIN_WHITELIST = (
 CSRF_TRUSTED_ORIGINS = [
     # "https://frontend.app",
     "https://localhost:3000",
+    "http://localhost:5173"
 ]
 
 # Application definition
