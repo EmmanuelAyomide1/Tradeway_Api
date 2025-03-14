@@ -76,7 +76,7 @@ class LoginView(views.APIView):
         user = serializer.validated_data
         if not user.email_verified:
             return Response({
-                'message': 'Your email address has not been verified. Please check your inbox for the verification email or use the "Resend Verification" option if needed.',
+                'message': 'Your email address has not been verified. Please check your inbox for the verification email or use the Resend Verification option if needed.',
                 'status': 'unverified',
             }, status=status.HTTP_400_BAD_REQUEST)
 
