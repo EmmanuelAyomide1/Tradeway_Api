@@ -1,8 +1,16 @@
-from rest_framework import serializers
-from account.models import Account
-from django.contrib.auth import authenticate
-from .models import Otp
 import re
+
+from decouple import config
+
+from django.contrib.auth import authenticate
+
+from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
+
+from account.models import Account
+
+from .models import Otp
+from .utils import Google, create_or_get_social_user
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -111,3 +119,45 @@ class ResetPasswordSerializer(serializers.Serializer):
                 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit and one special character'
                 )            
         return password
+    
+
+class GoogleSocialAuthSerializer(serializers.Serializer):
+    auth_token = serializers.CharField()
+
+    def validate_auth_token(self, auth_token):
+        user_data = Google.validate(auth_token)
+        try:
+            user_data["sub"]
+        except:
+            raise serializers.ValidationError(
+                " The token is invalid or expired. Please login again"
+            )
+        
+        if user_data["aud"] != config("GOOGLE_CLIENT_ID"):
+            raise AuthenticationFailed("User Not Recognized")
+
+        email = user_data["email"]
+        name = user_data["given_name"] if user_data["given_name"] else ""
+        # lastname = user_data["family_name"] if user_data["family_name"] else ""
+        auth_type = "google"
+        user_info = {
+            "name": name,
+            "email": email,
+        }
+
+        user, refresh_token, access_token = create_or_get_social_user(
+            user_info, auth_type
+        )
+
+        user_details = {}
+        data = {}
+        user_details["id"] = user.id
+        user_details["email"] = user.email
+        # user_details["account_type"] = user.account_type
+        user_details["name"] = user.name
+
+        data["user"] = user_details
+        data["refresh_token"] = str(refresh_token)
+        data["access_token"] = str(access_token)
+
+        return data

@@ -6,6 +6,8 @@ import datetime
 import uuid
 
 
+AUTH_TYPE = (("email", "email"), ("google", "google"), ("facebook", "facebook"))
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
@@ -39,11 +41,12 @@ class Account(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
-    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES,default='BUYER')
     email_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CustomUserManager()
+    auth_type = models.CharField(max_length=20, choices=AUTH_TYPE, default="email")
 
     username = None
     USERNAME_FIELD = 'email'
