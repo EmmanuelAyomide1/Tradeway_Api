@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-import dj_database_url
 
 from pathlib import Path
 from datetime import timedelta
@@ -63,6 +62,9 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     'drf_yasg',
+
+    # local apps
+    'account'
 ]
 
 MIDDLEWARE = [
@@ -102,7 +104,7 @@ ROOT_URLCONF = 'TradewayBackend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,7 +123,7 @@ WSGI_APPLICATION = 'TradewayBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASE_URL = config("DATABASE_URL")
+# DATABASE_URL = config("DATABASE_URL")
 
 # DATABASES = {
 #     "default": dj_database_url.parse(
@@ -199,3 +201,14 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
 }
+
+AUTH_USER_MODEL = "account.Account"
+
+# Email config
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
