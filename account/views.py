@@ -1,13 +1,17 @@
-from rest_framework import views, status
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from .emails import send_verification_email, send_password_reset_email
-from django.db import transaction
+from rest_framework import views, status
+
 from account.models import Account
-from django.shortcuts import get_object_or_404
+from TradewayBackend.utils import custom_error_response
+
+from .emails import send_verification_email, send_password_reset_email
 from .models import Otp
-from drf_yasg.utils import swagger_auto_schema
 from .serializers import (
     SignUpSerializer,
     LoginUserSerializer,
@@ -15,7 +19,8 @@ from .serializers import (
     OTPVerificationSerializer,
     ResendOTPSerializer,
     ResetPasswordSerializer,
-    ForgottenPasswordSerializer
+    ForgottenPasswordSerializer,
+    GoogleSocialAuthSerializer
 )
 
 
@@ -292,3 +297,38 @@ class LogoutView(views.APIView):
             return Response({'message': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({ 'message': 'Could not log out' }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class GoogleAuthentication(views.APIView):
+    permission_classes = []
+    serializer_class = GoogleSocialAuthSerializer
+
+    @swagger_auto_schema(
+        tags=["Authentication"],
+        request_body=serializer_class,
+        operation_summary="Google Login",
+        operation_description="Logs in / Register a user and returns an access and refresh token",
+        responses={
+            200: "Login successful",
+            400: "Bad Request",
+        },
+    )
+    def post(self,request,*args, **kwargs):
+
+        """Send an ID token from google to get user information"""
+
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            data = serializer.validated_data
+            print(data)
+            return Response({
+            "message": "Logged in successfully",
+            "data": data["auth_token"],
+            # "tokens": {
+            #     "access_token": data["auth_token"]["access_token"],
+            #     "refresh_token": data["auth_token"]["refresh_token"]
+            # }
+        })
+
+        return custom_error_response(str(serializer.errors), 400)
