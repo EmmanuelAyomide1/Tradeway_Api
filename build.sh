@@ -1,12 +1,13 @@
-#!/usr/bin/env bash
-# Exit on error
-set -o errexit
+#!/bin/bash
+echo "Installing dependencies..."
+python3.12 -m pip install --upgrade pip
+python3.12 -m pip install -r requirements/staging.txt
 
-# Modify this line as needed for your package manager (pip, poetry, etc.)
-pip install -r requirements/staging.txt
+echo "Running database migrations..."
+python3.12 manage.py makemigrations
+python3.12 manage.py migrate
 
-# Convert static asset files
-python manage.py collectstatic --no-input
+echo "Collecting static files..."
+python3.12 manage.py collectstatic --noinput --clear
 
-# Apply any outstanding database migrations
-# python manage.py migrate
+echo "Build completed!"
