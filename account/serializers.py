@@ -161,3 +161,11 @@ class GoogleSocialAuthSerializer(serializers.Serializer):
         data["access_token"] = str(access_token)
 
         return data
+    
+class TokenSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    response_token = serializers.CharField()
+
+class LoginResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    tokens =  TokenSerializer()

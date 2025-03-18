@@ -20,7 +20,8 @@ from .serializers import (
     ResendOTPSerializer,
     ResetPasswordSerializer,
     ForgottenPasswordSerializer,
-    GoogleSocialAuthSerializer
+    GoogleSocialAuthSerializer,
+    LoginResponseSerializer
 )
 
 
@@ -70,8 +71,8 @@ class LoginView(views.APIView):
         operation_summary="Log in a user",
         operation_description="Logs in a user and returns an access and refresh token",
         responses={
-            200: "Login successful",
-            400: "Bad Request",
+            200: LoginResponseSerializer,
+            400: "Incorrect email or password",
         },
     )
     def post(self, request):
@@ -145,6 +146,7 @@ class ForgottenPasswordView(views.APIView):
         responses={
             200: 'Password reset email sent to <email>',
             400: 'Bad Request',
+            404: 'No Account matches the given query.'
         },
     )
     def post(self, request, *args, **kwargs):
