@@ -1,18 +1,14 @@
-import os
-import sys
-from rest_framework import status
-from rest_framework.views import exception_handler
-from rest_framework.response import Response
-from rest_framework.views import exception_handler
-from rest_framework.response import Response
-from rest_framework import status
+from django.core.exceptions import ValidationError as DjangoValidationError, PermissionDenied
 from django.db import IntegrityError
-from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import Http404
 
+from rest_framework import status
+from rest_framework.views import exception_handler
+from rest_framework.response import Response
+from rest_framework.views import exception_handler
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from django.core.exceptions import ValidationError as DjangoValidationError
-
 
 
 def standardized_error_response(error_name, details, status_code):
