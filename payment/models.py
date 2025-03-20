@@ -14,9 +14,9 @@ class Transactions(models.Model):
      id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
      status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
      reference = models.CharField(max_length=255)
-     OrderId = models.ForeignKey(Order, on_delete=models.CASCADE)
-     CreatedAt = models.DateTimeField(auto_now_add=True)
-     UpdatedAt = models.DateTimeField(auto_now=True)
+     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+     created_at = models.DateTimeField(auto_now_add=True)
+     updated_at = models.DateTimeField(auto_now=True)
 
      def __str__(self):
          return f"Transaction {self.transaction_id} - {self.amount} - {self.status}"

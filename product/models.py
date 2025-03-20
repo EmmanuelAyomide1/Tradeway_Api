@@ -1,36 +1,18 @@
 from django.db import models
 import uuid
 from django.core.validators import MinValueValidator, MaxValueValidator
+from account.models import Account
 
-class Users(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255, unique=True)
-    email = models.CharField(max_length=255, unique=True)
-    account_type = models.CharField(max_length=255)
-    email_verified = models.BooleanField(default=False)
-    auth_type = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.name}"
-
-class Carts(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    products = models.ForeignKey("Product", on_delete=models.CASCADE)
-    buyer_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    def __str__(self):
-        return f"Cart {self.id} - {self.user} ({self.created_at})"
 
 
 
 class Category(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
-    image = models.ImageField(upload_to='product_images/',  blank=True)
+    image = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    CreatedAt = models.DateTimeField(auto_now_add=True)
-    UpdatedAt = (models.DateTimeField(auto_now=True))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = (models.DateTimeField(auto_now=True))
 
     def __str__(self):
         return self.name  
@@ -41,30 +23,36 @@ class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
     categories = models.ManyToManyField(Category)
-    size = models.CharField(max_length=50)
+    size = models.CharField(max_length=50, null=True)
     description = models.CharField(max_length=255)
-    color = models.CharField(max_length=50)
-    InitialPrice = models.DecimalField(max_digits=10, decimal_places=2)
-    CurrentPrice = models.DecimalField(max_digits=10, decimal_places=2)
-    InStock = models.BooleanField(default=True)
-    SellerId = models.ForeignKey(Users, on_delete=models.CASCADE)
+    color = models.CharField(max_length=50, null=True)
+    initial_price = models.DecimalField(max_digits=10, decimal_places=2)
+    current_price = models.DecimalField(max_digits=10, decimal_places=2)
+    in_stock = models.BooleanField(default=True)
+    seller_id = models.ForeignKey(Account, on_delete=models.CASCADE)
     images = models.JSONField(default=list)
-    video = models.JSONField(default=list)
-    IsApproved = models.BooleanField(default=False)
-    CreatedAt = models.DateTimeField(auto_now_add=True)
-    UpdatedAt = models.DateTimeField(auto_now=True)
+    video = models.JSONField(default=list, null=True)
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"{self.name} - ${self.price}"
 
 
+class Carts(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    products = models.ManyToManyField(Product)
+    buyer_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    def __str__(self):
+        return f"Cart {self.id} - {self.user} ({self.created_at})"
 
 
 class CartProducts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    CartId = models.ForeignKey(Carts, on_delete=models.CASCADE)
-    ProductId= models.ForeignKey(Product, on_delete=models.CASCADE)
-    CreatedAt = models.DateTimeField(auto_now_add=True)
-    UpdatedAt = models.DateTimeField(auto_now=True)
+    cart_id = models.ForeignKey(Carts, on_delete=models.CASCADE)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.product.name} x {self.quantity} in Cart {self.cart.id}"
@@ -81,24 +69,24 @@ class Orders(models.Model):
 
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    ProductId = models.ForeignKey(Product, on_delete=models.CASCADE)
-    BuyerId = models.ForeignKey(Users, on_delete=models.CASCADE)
-    CreatedAt = models.DateTimeField(auto_now_add=True)
-    UpdatedAt = models.DateTimeField(auto_now=True)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    buyer_id = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
         return f"Order {self.id} - {self.status} - {self.user}"
 
-
+ 
 
 class ProductReview(models.Model):
-    id = models.BigIntegerField(primary_key=True)
-    ProductId = models.ForeignKey(Product, on_delete=models.CASCADE)
-    UserId = models.ForeignKey(Users, on_delete=models.CASCADE)
-    review = models.CharField(max_length=255)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(Account, on_delete=models.CASCADE)
+    review = models.CharField(max_length=255, blank=True, null=True)
     rating = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
-    CreatedAt = models.DateTimeField(auto_now_add=True)
-    UpdatedAt = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
