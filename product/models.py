@@ -22,7 +22,7 @@ class Category(models.Model):
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
-    categories = models.ManyToManyField(Category)
+    categories = models.ManyToManyField(Category, related_name='product')
     size = models.CharField(max_length=50, null=True)
     description = models.CharField(max_length=255)
     color = models.CharField(max_length=50, null=True)
@@ -31,18 +31,24 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     seller_id = models.ForeignKey(Account, on_delete=models.CASCADE)
     images = models.JSONField(default=list)
-    video = models.JSONField(default=list, null=True)
+    video = models.FileField(upload_to="products/", blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"{self.name} - ${self.price}"
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+    image = models.FileField(upload_to="products/", blank=True, null=True)
 
+    def __str__(self):
+        return f"Image for {self.product.name}"
+    
 class Carts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    products = models.ManyToManyField(Product)
-    buyer_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    products = models.ManyToManyField(Product, related_name='carts')
+    buyer_id = models.OneToOneField(Account, on_delete=models.CASCADE)
     def __str__(self):
         return f"Cart {self.id} - {self.user} ({self.created_at})"
 
