@@ -69,7 +69,8 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     # local apps
-    'account'
+    'account',
+    'product'
 ]
 
 MIDDLEWARE = [
