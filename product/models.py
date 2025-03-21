@@ -9,7 +9,7 @@ from account.models import Account
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
-    image = models.FileField(upload_to="categories/")
+    image = models.ImageField(upload_to="categories", null=True, blank=True)
     description = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = (models.DateTimeField(auto_now=True))
