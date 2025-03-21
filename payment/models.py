@@ -1,9 +1,11 @@
-from django.db import models
-from product.models import Order, Cart  # Import models from the product app
 import uuid
 
+from django.db import models
 
-class Transactions(models.Model):
+from product.models import Order  # Import models from the product app
+
+
+class Transaction(models.Model):
 
      STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -14,9 +16,9 @@ class Transactions(models.Model):
      id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
      status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
      reference = models.CharField(max_length=255)
-     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='transactions')
      created_at = models.DateTimeField(auto_now_add=True)
      updated_at = models.DateTimeField(auto_now=True)
 
      def __str__(self):
-         return f"Transaction {self.transaction_id} - {self.amount} - {self.status}"
+         return f"Transaction {self.id} - {self.status}"
