@@ -63,13 +63,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "cloudinary_storage",
+    "cloudinary",
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
     'drf_yasg',
 
     # local apps
-    'account'
+    'account',
+    'product',
+    'payment',
 ]
 
 MIDDLEWARE = [
@@ -158,15 +162,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# CLOUDINARY_STORAGE = {
-#     "CLOUD_NAME": config("CLOUD_NAME"),
-#     "API_KEY": config("CLOUDINARY_API"),
-#     "API_SECRET": config("CLOUDINARY_API_SECRET"),
-# }
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": config("CLOUDINARY_API_KEY"),
+    "API_SECRET": config("CLOUDINARY_SECRET_KEY"),
+}
 
 MEDIA_URL = "/media/"
-
-# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 STATIC_URL = "/static/"
 
