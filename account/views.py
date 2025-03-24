@@ -9,7 +9,6 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework import views, status
 
 from account.models import Account
-from TradewayBackend.utils import custom_error_response
 
 from .emails import send_verification_email, send_password_reset_email
 from .models import Otp
@@ -339,7 +338,7 @@ class GoogleAuthentication(views.APIView):
 
         serializer = self.serializer_class(data=request.data)
 
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             data = serializer.validated_data
             print(data)
             return Response({
@@ -350,5 +349,3 @@ class GoogleAuthentication(views.APIView):
             #     "refresh_token": data["auth_token"]["refresh_token"]
             # }
         })
-
-        return custom_error_response(str(serializer.errors), 400)

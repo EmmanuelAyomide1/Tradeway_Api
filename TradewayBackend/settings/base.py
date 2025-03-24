@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+from django.conf import settings
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,8 +32,8 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG")
 
-# ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", ".onrender.com","127.0.0.1"]
-ALLOWED_HOSTS = ["localhost", ".vercel.app", "now.sh", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", ".onrender.com","127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", ".vercel.app", "now.sh", "127.0.0.1"]
 # RENDER_EXTERNAL_HOSTNAME = config("RENDER_EXTERNAL_HOSTNAME")
 # ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME) if RENDER_EXTERNAL_HOSTNAME else []
 
@@ -63,13 +64,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "cloudinary_storage",
+    "cloudinary",
+    "anymail",
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
     'drf_yasg',
 
     # local apps
-    'account'
+    'account',
+    'product',
+    'payment',
 ]
 
 MIDDLEWARE = [
@@ -158,15 +164,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# CLOUDINARY_STORAGE = {
-#     "CLOUD_NAME": config("CLOUD_NAME"),
-#     "API_KEY": config("CLOUDINARY_API"),
-#     "API_SECRET": config("CLOUDINARY_API_SECRET"),
-# }
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": config("CLOUDINARY_API_KEY"),
+    "API_SECRET": config("CLOUDINARY_SECRET_KEY"),
+}
 
 MEDIA_URL = "/media/"
-
-# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 STATIC_URL = "/static/"
 
@@ -210,10 +215,10 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = "account.Account"
 
 # Email config
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = config('EMAIL_PORT')
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_BACKEND = "anymail.backends.mailersend.EmailBackend"
+ANYMAIL = {
+    "MAILERSEND_API_TOKEN": config("MAILERSEND_API_KEY"),
+    "MAILERSEND_SENDER_DOMAIN": config("MAILERSEND_SENDER_DOMAIN"),
+}
+DEFAULT_FROM_EMAIL = "info@trial-eqvygm0zjj8l0p7w.mlsender.net"
