@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -32,12 +33,28 @@ class SignUpView(views.APIView):
     @transaction.atomic
     @swagger_auto_schema(
         tags=["Authentication"],
-        request_body=serializer_class,
+        request_body=SignUpSerializer,
         operation_summary="Register a user",
-        operation_description="Registers a user on the platform and sends an OTP to the user's email for verification",
+        operation_description="Registers a user on the platform and sends an OTP to the user's email for verification.",
         responses={
-            201: "Account created successfully, check your email for verification",
-            400: "Bad Request",
+            201: openapi.Response(
+                description="Account created successfully",
+                examples={
+                    "application/json": {
+                        "message": "Account created successfully, check your email for verification"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Validation Errors",
+                examples={
+                    "application/json": 
+                        {
+                            "email": ["Enter a valid email address."],                        
+                            "password": ["Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character"]
+                        }
+                }
+            ),
         },
     )
     def post(self, request):
@@ -62,6 +79,7 @@ class SignUpView(views.APIView):
 
 
 class LoginView(views.APIView):
+    
     permission_classes = []
     serializer_class = LoginUserSerializer
 
