@@ -75,8 +75,7 @@ class SignUpView(views.APIView):
             {"message": "Account created successfully, check your email for verification"},
             status=status.HTTP_201_CREATED,
         )
-
-
+        
 class LoginView(views.APIView):
     
     permission_classes = []
@@ -86,10 +85,32 @@ class LoginView(views.APIView):
         tags=["Authentication"],
         request_body=serializer_class,
         operation_summary="Log in a user",
-        operation_description="Logs in a user and returns an access and refresh token",
+        operation_description="Logs in a user and returns an access and refresh token.",
         responses={
-            200: LoginResponseSerializer,
-            400: "Incorrect email or password",
+            200: openapi.Response(
+                description="Successful login",
+                examples={
+                    "application/json": {
+                        "message": "Logged in successfully",
+                        "tokens": {
+                            "access_token": "eyJhbGciOiJIUzI1...",
+                            "refresh_token": "eyJhbGciOiJIUzI1..."
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Validation Errors",
+                examples={
+                    "application/json": {
+                        "status": 400,
+                        "error": "ValidationError",
+                        "details": {
+                            "non_field_errors": "Incorrect email or password"
+                        }
+                    }
+                }
+            ),
         },
     )
     def post(self, request):
@@ -113,8 +134,7 @@ class LoginView(views.APIView):
                 "access_token": access_token,
                 "refresh_token": refresh_token
             }
-        })
-
+        }, status=status.HTTP_200_OK)
 
 class ResendOTPView(views.APIView):
     """
@@ -127,10 +147,26 @@ class ResendOTPView(views.APIView):
         tags=['Authentication'],
         request_body=serializer_class,
         operation_summary='Resend OTP',
-        operation_description='Resends the OTP to the user',
+        operation_description='Resends the OTP to the user via email.',
         responses={
-            200: 'OTP resent successfully',
-            400: 'Bad Request',
+            200: openapi.Response(
+                description="OTP resent successfully",
+                examples={
+                    "application/json": {
+                        "message": "OTP resent successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Validation Errors",
+                examples={
+                    "application/json": {
+                        "email": "Email already verified.",
+                        "email": "Email does not exist.",
+                        "email": "Enter a valid email address."
+                    }
+                }
+            ),
         },
     )
     def post(self, request, *args, **kwargs):
@@ -146,6 +182,7 @@ class ResendOTPView(views.APIView):
         )
 
         return Response({'message': 'OTP resent successfully'}, status=status.HTTP_200_OK)
+
 
 
 class ForgottenPasswordView(views.APIView):
@@ -196,7 +233,7 @@ class ResetPasswordView(views.APIView):
         operation_description='Resets the user\'s password',
         responses={
             200: 'Password reset successfully',
-            400: 'Bad Request',
+            400: 'Invalid OTP"',
         },
     )
     def patch(self, request, *args, **kwargs):
@@ -228,7 +265,7 @@ class OTPVerificationView(views.APIView):
         operation_description="Verifies an account by validating an OTP",
         responses={
             200: "OTP Verified successfully",
-            400: "Bad Request",
+            400: "Otp matching query does not exist",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -327,9 +364,9 @@ class GoogleAuthentication(views.APIView):
         request_body=serializer_class,
         operation_summary="Google Login",
         operation_description="Logs in / Register a user and returns an access and refresh token",
-        responses={
-            200: "Login successful",
-            400: "Bad Request",
+         responses={
+            200: LoginResponseSerializer,
+            400: "Incorrect email or password",
         },
     )
     def post(self,request,*args, **kwargs):
