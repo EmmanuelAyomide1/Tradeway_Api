@@ -1,7 +1,9 @@
 import uuid
-
+import cloudinary
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import pre_save, pre_delete
+from django.dispatch import receiver
 
 from cloudinary_storage.storage import MediaCloudinaryStorage
 
@@ -18,6 +20,31 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name  
+
+
+@receiver(pre_save, sender=Category)
+def add_cloudinary_base_url(sender, instance, **kwargs):
+    """
+    Add Cloudinary base URL to the image before saving
+    """
+    # Only add base URL if the image is being updated and doesn't already have the base URL
+    if instance.pk and instance.image and not str(instance.image).startswith('http'):
+        # Get existing instance to check if image changed
+        try:
+            old_instance = Category.objects.get(pk=instance.pk)
+            # If the image has changed, delete the old one from Cloudinary
+            if old_instance.image and old_instance.image != instance.image:
+                cloudinary.uploader.destroy(old_instance.image.name)
+        except Category.DoesNotExist:
+            pass
+
+@receiver(pre_delete, sender=Category)
+def delete_cloudinary_image(sender, instance, **kwargs):
+    """
+    Delete image from cloudinary when category is deleted
+    """
+    if instance.image:
+        cloudinary.uploader.destroy(instance.image.name)
 
 
 class Product(models.Model):

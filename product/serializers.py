@@ -19,9 +19,31 @@ class CartProductsSerializer(serializers.ModelSerializer):
         fields = '__all__' 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Category model
+    """
     class Meta:
         model = Category
-        fields = '__all__' 
+        fields = ['id', 'name', 'image', 'description', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class CategoryCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating a new category
+    """
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'image', 'description', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        if not attrs.get('name'):
+            raise serializers.ValidationError({'name': 'Name is required'})
+        if not attrs.get('description'):
+            raise serializers.ValidationError({'description': 'Description is required'})
+        if not attrs.get('image'):
+            raise serializers.ValidationError({'image': 'Image is required'})
+        return attrs
 
 class CartsSerializer(serializers.ModelSerializer):
     class Meta:
