@@ -215,11 +215,18 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = "account.Account"
 
-# Email config
-EMAIL_PORT = config('EMAIL_PORT')
-EMAIL_BACKEND = "anymail.backends.mailersend.EmailBackend"
-ANYMAIL = {
-    "MAILERSEND_API_TOKEN": config("MAILERSEND_API_KEY"),
-    "MAILERSEND_SENDER_DOMAIN": config("MAILERSEND_SENDER_DOMAIN"),
-}
-DEFAULT_FROM_EMAIL = "info@trial-eqvygm0zjj8l0p7w.mlsender.net"
+# MAILER SEND CONFIG
+# EMAIL_PORT = config('EMAIL_PORT')
+# EMAIL_BACKEND = "anymail.backends.mailersend.EmailBackend"
+# ANYMAIL = {
+#     "MAILERSEND_API_TOKEN": config("MAILERSEND_API_KEY"),
+#     "MAILERSEND_SENDER_DOMAIN": config("MAILERSEND_SENDER_DOMAIN"),
+# }
+# DEFAULT_FROM_EMAIL = "info@trial-eqvygm0zjj8l0p7w.mlsender.net"
+
+# EMAIL CONFIG
+EMAIL_HOST=config("EMAIL_HOST")
+EMAIL_HOST_USER=config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD=config("EMAIL_HOST_PASSWORD")
+EMAIL_PORT=config("EMAIL_PORT")
+DEFAULT_FROM_EMAIL="hello@tradeway.com"
