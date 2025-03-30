@@ -21,32 +21,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name  
 
-
-@receiver(pre_save, sender=Category)
-def add_cloudinary_base_url(sender, instance, **kwargs):
-    """
-    Add Cloudinary base URL to the image before saving
-    """
-    # Only add base URL if the image is being updated and doesn't already have the base URL
-    if instance.pk and instance.image and not str(instance.image).startswith('http'):
-        # Get existing instance to check if image changed
-        try:
-            old_instance = Category.objects.get(pk=instance.pk)
-            # If the image has changed, delete the old one from Cloudinary
-            if old_instance.image and old_instance.image != instance.image:
-                cloudinary.uploader.destroy(old_instance.image.name)
-        except Category.DoesNotExist:
-            pass
-
-@receiver(pre_delete, sender=Category)
-def delete_cloudinary_image(sender, instance, **kwargs):
-    """
-    Delete image from cloudinary when category is deleted
-    """
-    if instance.image:
-        cloudinary.uploader.destroy(instance.image.name)
-
-
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)

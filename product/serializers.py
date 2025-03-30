@@ -1,11 +1,13 @@
+from django.conf import settings
 from rest_framework import serializers
-from .models import Users, CartProducts, Carts, Category, Product, ProductReview, Orders
+from .models import CartProducts, Carts, Category, Product, ProductReview, Order
 
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Users
+        model = settings.AUTH_USER_MODEL
         fields = '__all__' 
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,44 +20,47 @@ class CartProductsSerializer(serializers.ModelSerializer):
         model = CartProducts
         fields = '__all__' 
 
+
 class CategorySerializer(serializers.ModelSerializer):
     """
     Serializer for the Category model
     """
+    name = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    image = serializers.ImageField(required=True) 
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'image', 'description', 'created_at', 'updated_at']
+        fields = "__all__"
         read_only_fields = ['id', 'created_at', 'updated_at']
 
-class CategoryCreateSerializer(serializers.ModelSerializer):
+
+class CategoryUpdateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating a new category
+    Serializer for updating a category (fields optional)
     """
+    name = serializers.CharField(required=False)  # Optional on update
+    description = serializers.CharField(required=False)
+    image = serializers.ImageField(required=False)
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'image', 'description', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = "__all__"
 
-    def validate(self, attrs):
-        if not attrs.get('name'):
-            raise serializers.ValidationError({'name': 'Name is required'})
-        if not attrs.get('description'):
-            raise serializers.ValidationError({'description': 'Description is required'})
-        if not attrs.get('image'):
-            raise serializers.ValidationError({'image': 'Image is required'})
-        return attrs
 
 class CartsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carts
         fields = '__all__' 
 
+
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = '__all__' 
 
+
 class OrdersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Orders
+        model = Order
         fields = '__all__' 
