@@ -1,3 +1,4 @@
+from operator import is_
 import cloudinary
 
 from django.db.models import Count
@@ -76,7 +77,7 @@ class ProductReviewViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     
     def get_queryset(self):
-        queryset = ProductReview.objects.all()
+        queryset = ProductReview.objects.all().exclude(is_offensive=True)
         
        
         product_id = self.request.query_params.get('product_id')
