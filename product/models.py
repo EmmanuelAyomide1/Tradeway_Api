@@ -36,6 +36,9 @@ class Product(models.Model):
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    average_rating = models.DecimalField(
+        max_digits=3, decimal_places=1, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)]
+    )
 
     def __str__(self):      
         return f"{self.name} - ${self.current_price}"
@@ -71,17 +74,19 @@ class CartProducts(models.Model):
 class Order(models.Model):
 
     STATUS_CHOICES = [
-        ('pending', 'pending'),
-        ('delivered', 'delivered'),
-        ('cancelled', 'cancelled'),
+        ('pending', 'Pending'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    products = models.ManyToManyField(Product, related_name='orders')
     buyer = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    total_amount = models.PositiveIntegerField(default=0)
+    address = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"Order {self.id} - {self.status} - {self.buyer.id}"

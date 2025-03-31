@@ -9,13 +9,6 @@ from .models import  CartProducts, Carts, Category, Product, ProductReview, Orde
 from .utils import custom_review_handler
 
 
-class UsersSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = settings.AUTH_USER_MODEL
-        fields = '__all__' 
-
-
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -24,7 +17,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class CartProductsSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = CartProducts
         fields = '__all__' 
@@ -96,7 +89,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
        
         has_purchased = Order.objects.filter(
             buyer=user, 
-            product=product, 
+            products=product, 
             status='delivered'
         ).exists()
         
@@ -130,6 +123,21 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         
         product.average_rating = round(avg_rating, 2)
         product.save()
+
+
+class ProductReviewListSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField('get_user')
+
+    class Meta:
+        model = ProductReview
+        fields = '__all__'
+
+    def get_user(self, obj):
+        return {
+            "name": obj.user.name,
+            "image": None,
+            "email": obj.user.email,
+        }
 
 class OrdersSerializer(serializers.ModelSerializer):
     class Meta:
