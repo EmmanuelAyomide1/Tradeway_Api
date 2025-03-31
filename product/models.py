@@ -1,7 +1,9 @@
 import uuid
-
+import cloudinary
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import pre_save, pre_delete
+from django.dispatch import receiver
 
 from cloudinary_storage.storage import MediaCloudinaryStorage
 
@@ -18,7 +20,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name  
-
 
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
