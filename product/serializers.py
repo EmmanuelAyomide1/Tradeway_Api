@@ -1,27 +1,57 @@
-from rest_framework import serializers
-from .models import  CartProducts, Carts, Category, Product, ProductReview, Order
-
-from rest_framework import serializers
-
-from .utils import custom_review_handler
+from django.conf import settings
 from django.db import models
-# class UsersSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Users
-#         fields = '__all__' 
+
+from rest_framework import serializers
+from rest_framework import serializers
+
+from payment.models import Transaction
+from .models import  CartProducts, Carts, Category, Product, ProductReview, Order
+from .utils import custom_review_handler
+
+
+class UsersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = settings.AUTH_USER_MODEL
+        fields = '__all__' 
+
 
 class ProductSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Product
         fields = '__all__' 
 
 
 class CartProductsSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = CartProducts
         fields = '__all__' 
 
+
 class CategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Category model
+    """
+    name = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    image = serializers.ImageField(required=True) 
+
+    class Meta:
+        model = Category
+        fields = "__all__"
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class CategoryUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating a category (fields optional)
+    """
+    name = serializers.CharField(required=False)  # Optional on update
+    description = serializers.CharField(required=False)
+    image = serializers.ImageField(required=False)
+
     class Meta:
         model = Category
         fields = '__all__' 
@@ -100,6 +130,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         
         product.average_rating = round(avg_rating, 2)
         product.save()
+
 class OrdersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order

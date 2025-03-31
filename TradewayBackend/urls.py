@@ -54,5 +54,5 @@ urlpatterns = [
     ),
     path("admin/", admin.site.urls),
     path("v1/auth/", include("account.urls")),
-    path("products/", include("product.urls")),
+    path("v1/products/", include("product.urls")),
 ]
