@@ -1,15 +1,24 @@
+from operator import is_
 import cloudinary
+
+from django.db.models import Count
 
 from rest_framework import viewsets, filters
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from TradewayBackend.pagination import CustomPagination
 
+from .models import Category,ProductReview, Product
 from .permissions import IsAdmin
-from .models import Category
-from .serializers import CategorySerializer,CategoryUpdateSerializer
+from .serializers import (
+    CategorySerializer,
+    CategoryUpdateSerializer, 
+    ProductReviewSerializer, 
+    ProductReviewListSerializer
+    )
+from .utils import IsReviewOwnerOrAdminPermission
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -59,3 +68,37 @@ class CategoryViewSet(viewsets.ModelViewSet):
         
         self.perform_update(serializer)
         return Response(serializer.data)
+
+
+class ProductReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductReviewSerializer
+    permission_classes = [IsReviewOwnerOrAdminPermission]
+    queryset = ProductReview.objects.all()
+    pagination_class = CustomPagination
+    
+    def get_queryset(self):
+        queryset = ProductReview.objects.all().exclude(is_offensive=True)
+        
+       
+        product_id = self.request.query_params.get('product_id')
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+        
+
+        rating = self.request.query_params.get('rating')
+        if rating:
+            queryset = queryset.filter(rating=rating)
+        
+        # Sorting
+        sort = self.request.query_params.get('sort', 'newest')
+        if sort == 'newest':
+            queryset = queryset.order_by('-created_at')
+        elif sort == 'oldest':
+            queryset = queryset.order_by('created_at')
+        
+        return queryset
+    
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'list']:
+            return ProductReviewListSerializer
+        return super().get_serializer_class()
