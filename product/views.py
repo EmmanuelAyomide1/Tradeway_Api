@@ -1,6 +1,8 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from django.db.models import Count
+
+from TradewayBackend.pagination import CustomPagination
 from .models import ProductReview, Product
 from .serializers import ProductReviewSerializer
 from .utils import IsReviewOwnerOrAdminPermission
@@ -8,6 +10,8 @@ from .utils import IsReviewOwnerOrAdminPermission
 class ProductReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ProductReviewSerializer
     permission_classes = [IsReviewOwnerOrAdminPermission]
+    queryset = ProductReview.objects.all()
+    pagination_class = CustomPagination
     
     def get_queryset(self):
         queryset = ProductReview.objects.all()

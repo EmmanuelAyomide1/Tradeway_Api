@@ -100,7 +100,7 @@ class ProductReview(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     rating = models.IntegerField(choices=RATING_CHOICES)
-    comment = models.TextField()
+    comment = models.TextField(blank=True , null=True)
     is_offensive = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

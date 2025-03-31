@@ -1,9 +1,14 @@
 from django.urls import path
-from .views import (
-  ProductReviewViewSet
-  )
+from django.urls import include
 
+from rest_framework.routers import DefaultRouter
+
+from .views import ProductReviewViewSet
+
+
+router = DefaultRouter()
+router.register(r'reviews', ProductReviewViewSet)
 
 urlpatterns = [
-     path("productreview/", ProductReviewViewSet.as_view({'get': 'list', 'post': 'create'}), name="productreview"),   
-]   
+    path('', include(router.urls)),
+]
