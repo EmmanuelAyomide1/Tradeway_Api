@@ -1,9 +1,6 @@
 import uuid
-import cloudinary
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models.signals import pre_save, pre_delete
-from django.dispatch import receiver
 
 from cloudinary_storage.storage import MediaCloudinaryStorage
 
@@ -55,7 +52,7 @@ class ProductImage(models.Model):
 class Carts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     products = models.ManyToManyField(Product, related_name='carts')
-    buyer = models.OneToOneField(Account, on_delete=models.CASCADE)
+    buyer = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='cart')
     def __str__(self):
         return f"Cart {self.id} - {self.buyer} "
 
@@ -89,7 +86,7 @@ class Order(models.Model):
     address = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"Order {self.id} - {self.status} - {self.buyer.id}"
+        return f"Order {self.status} - {self.buyer.name}"
 
 
 class ProductReview(models.Model):
