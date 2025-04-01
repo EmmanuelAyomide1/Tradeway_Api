@@ -1,22 +1,26 @@
 from operator import is_
 import cloudinary
 
-from django.db.models import Count
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import OrderFilter
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, generics
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from TradewayBackend.pagination import CustomPagination
 
-from .models import Category,ProductReview, Product
+from .models import Category,ProductReview, Order
 from .permissions import IsAdmin
 from .serializers import (
     CategorySerializer,
     CategoryUpdateSerializer, 
     ProductReviewSerializer, 
-    ProductReviewListSerializer
+    ProductReviewListSerializer,
+    OrderListSerializer
     )
 from .utils import IsReviewOwnerOrAdminPermission
 
@@ -68,6 +72,71 @@ class CategoryViewSet(viewsets.ModelViewSet):
         
         self.perform_update(serializer)
         return Response(serializer.data)
+
+
+class OrderListView(generics.ListAPIView):
+    serializer_class = OrderListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = OrderFilter
+    queryset = Order.objects.all()
+
+    @swagger_auto_schema(
+        tags=['Order'],
+        operation_summary='List all orders for the current authenticated user',
+        manual_parameters=[
+            openapi.Parameter(
+                'status',
+                openapi.IN_QUERY,
+                description="Filter by order status (pending/delivered/cancelled)",
+                type=openapi.TYPE_STRING,
+                enum=['pending', 'delivered', 'cancelled']
+            ),
+            openapi.Parameter(
+                'start_date',
+                openapi.IN_QUERY,
+                description="Filter orders created on or after this date (format: YYYY-MM-DDThh:mm:ssZ)",
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME
+            ),
+            openapi.Parameter(
+                'end_date',
+                openapi.IN_QUERY,
+                description="Filter orders created on or before this date (format: YYYY-MM-DDThh:mm:ssZ)",
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME
+            ),
+            openapi.Parameter(
+                'min_amount',
+                openapi.IN_QUERY,
+                description="Filter orders with total amount greater than or equal to this value",
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'max_amount',
+                openapi.IN_QUERY,
+                description="Filter orders with total amount less than or equal to this value",
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'product_id',
+                openapi.IN_QUERY,
+                description="Filter orders containing a specific product by UUID",
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_UUID
+            ),
+            openapi.Parameter(
+                'address',
+                openapi.IN_QUERY,
+                description="Filter orders by partial address match (case insensitive)",
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Order.objects.filter(buyer=self.request.user)
 
 
 class ProductReviewViewSet(viewsets.ModelViewSet):

@@ -2,24 +2,14 @@ from django.conf import settings
 from django.db import models
 
 from rest_framework import serializers
-from rest_framework import serializers
 
-from payment.models import Transaction
 from .models import  CartProducts, Carts, Category, Product, ProductReview, Order
 from .utils import custom_review_handler
 
 
-class ProductSerializer(serializers.ModelSerializer):
-
+class UsersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
-        fields = '__all__' 
-
-
-class CartProductsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CartProducts
+        model = settings.AUTH_USER_MODEL
         fields = '__all__' 
 
 
@@ -35,6 +25,26 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = "__all__"
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True)
+    class Meta:
+        model = Product
+        fields = '__all__' 
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+class CartProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartProducts
+        fields = '__all__'
 
 
 class CategoryUpdateSerializer(serializers.ModelSerializer):
