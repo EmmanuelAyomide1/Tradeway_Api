@@ -32,7 +32,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", '661a-197-211-58-183.ngrok-free.app', ".onrender.com","127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", ".onrender.com","127.0.0.1"]
 # ALLOWED_HOSTS = ["localhost", ".vercel.app", "now.sh", "127.0.0.1"]
 # RENDER_EXTERNAL_HOSTNAME = config("RENDER_EXTERNAL_HOSTNAME")
 # ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME) if RENDER_EXTERNAL_HOSTNAME else []
