@@ -118,4 +118,3 @@ class CartViewset(
     pagination_class = CustomPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['product__name']
-    http_method_names = ['get', 'post', 'delete']
