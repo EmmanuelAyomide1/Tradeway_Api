@@ -99,8 +99,8 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.BasicAuthentication",
     ],
     "EXCEPTION_HANDLER": "TradewayBackend.utils.custom_exception_handler",
 }
@@ -230,3 +230,6 @@ EMAIL_HOST_USER=config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD=config("EMAIL_HOST_PASSWORD")
 EMAIL_PORT=config("EMAIL_PORT")
 DEFAULT_FROM_EMAIL="hello@tradeway.com"
+
+# Paystack
+PAYSTACK_SECRET_KEY=config("PAYSTACK_SECRET_KEY")

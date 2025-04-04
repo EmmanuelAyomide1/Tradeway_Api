@@ -2,7 +2,6 @@ from dataclasses import field
 from django.db import models
 
 from rest_framework import serializers
-from rest_framework import serializers
 
 from .models import CartProducts, Carts, Category, Product, ProductImage, ProductReview, Order, SavedProduct
 from .utils import custom_review_handler
@@ -157,6 +156,20 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = "__all__"
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+class CartProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartProducts
+        fields = '__all__'
 
 
 class CategoryUpdateSerializer(serializers.ModelSerializer):
