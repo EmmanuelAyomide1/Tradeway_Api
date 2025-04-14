@@ -1,29 +1,34 @@
 from operator import is_
-import cloudinary
 
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from rest_framework import viewsets, filters, mixins, generics
+from rest_framework import viewsets, filters, mixins, mixins, generics
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from TradewayBackend.pagination import CustomPagination
+from product.utils import deleteImageInCloudinary
 
 from .filters import OrderFilter
-from .models import CartProduct, Category, ProductReview, Order
-from .permissions import IsAdmin
+from .models import CartProduct, Category,  Product, ProductImage, ProductReview, Order, SavedProduct
 from .serializers import (
     CartProductSerializer,
     CategorySerializer,
     CategoryUpdateSerializer,
+    ProductDetailSerializer,
+    ProductImageSerializer,
+    ProductImageUpdateSerializer,
     ProductReviewSerializer,
     ProductReviewListSerializer,
+    ProductSerializer,
+    ProductUpdateSerializer,
+    SavedProductSerializer,
     OrderListSerializer
 )
-from .utils import IsReviewOwnerOrAdminPermission
+from .permissions import IsProductSeller, IsReviewOwnerOrAdminPermission, IsAdmin, IsSellerOrReadOnly
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -65,11 +70,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         # If image is being updated, delete the old image from Cloudinary
         if old_image and 'image' in request.data and old_image != request.data['image']:
-            try:
-                cloudinary.uploader.destroy(old_image.name)
-            except Exception as e:
-                # Log error but continue with update
-                print(f"Error deleting old image: {e}")
+            deleteImageInCloudinary(old_image)
 
         self.perform_update(serializer)
         return Response(serializer.data)
@@ -187,3 +188,61 @@ class CartViewset(
     pagination_class = CustomPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['product__name']
+
+
+class ProductViewset(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all().order_by('created_at')
+    pagination_class = CustomPagination
+    permission_classes = [IsSellerOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["id", "name", "categories__name", "categories__id"]
+    http_method_names = ["get", "post", "patch", "delete"]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_permissions(self):
+        """
+        Return permissions based on action:
+        - List and retrieve: allow all users
+        - Create, update, delete: admin only
+        """
+        if self.action in ['update', 'partial_update', 'destroy']:
+            permission_classes = [IsProductSeller]
+        else:
+            permission_classes = self.permission_classes
+        return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update']:
+            return ProductUpdateSerializer
+        elif self.action == 'retrieve':
+            return ProductDetailSerializer
+        return super().get_serializer_class()
+
+
+class ProductImageViewset(viewsets.ModelViewSet):
+    serializer_class = ProductImageSerializer
+    queryset = ProductImage.objects.all()
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsProductSeller]
+    http_method_names = ["post", "patch", "delete"]
+
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update']:
+            return ProductImageUpdateSerializer
+        return super().get_serializer_class()
+
+
+class SavedProductViewset(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    serializer_class = SavedProductSerializer
+    queryset = SavedProduct.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["id", "product__name"]
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+    http_method_names = ['post', 'delete', 'get']

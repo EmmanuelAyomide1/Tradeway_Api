@@ -1,4 +1,4 @@
-from rest_framework import permissions
+import cloudinary
 import re 
 
 
@@ -37,12 +37,11 @@ class custom_review_handler:
         
         return False
     
-
-
-
-class IsReviewOwnerOrAdminPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-      
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return obj.user == request.user or request.user.is_staff
+    
+def deleteImageInCloudinary(image):
+    try:
+        cloudinary.uploader.destroy(image.name)
+        print("deleted successfully")
+    except Exception as e:
+        # Log error but continue with update
+        print(f"Error deleting old image: {e}")

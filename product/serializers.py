@@ -3,7 +3,7 @@ from django.conf import settings
 
 from rest_framework import serializers
 
-from .models import Cart, CartProduct, Category, Product, ProductReview, Order
+from .models import Cart, CartProduct, Category, Product, ProductImage, ProductReview, Order, SavedProduct
 from .utils import custom_review_handler
 
 
@@ -28,11 +28,133 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    categories = CategorySerializer(many=True)
+
+    extra_images = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = '__all__'
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+            'average_rating',
+            'is_approved',
+            'seller',
+            'in_stock',
+            'initial_price',
+        ]
+
+    def create(self, validated_data):
+        """
+        set the initial price to the current price when creating a product
+        """
+        validated_data['initial_price'] = validated_data['current_price']
+        validated_data['seller'] = self.context['request'].user
+        product = super().create(validated_data)
+
+        return product
+
+    def get_extra_images(self, obj):
+        """
+        Retrieve all extra images for the product
+        """
+        return [{"image": img.image.url, "id": img.id} for img in obj.extra_images.all()]
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+
+    seller = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def get_seller(self, obj):
+        user = obj.seller
+        return {
+            "name": user.name,
+            "image": None,
+            "email": user.email
+        }
+
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating a product (fields optional)
+    """
+    name = serializers.CharField(required=False)  # Optional on update
+    description = serializers.CharField(required=False)
+    current_price = serializers.DecimalField(
+        required=False, max_digits=10, decimal_places=2)
+    image = serializers.FileField(required=False)
+    categories = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        many=True,
+        required=False
+    )
+
+    class Meta:
+        model = Product
+        exclude = [
+            'initial_price',
+            'is_approved',
+            'seller',
+            'in_stock',
+            'average_rating'
+        ]
+
+    def update(self, instance, validated_data):
+        """
+        set updated product approval to False
+        """
+        instance.is_approved = False
+        return super().update(instance, validated_data)
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for product images
+    """
+    image = serializers.ImageField(required=True,)
+
+    class Meta:
+        model = ProductImage
+        fields = '__all__'
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        product = validated_data['product']
+
+        image_count = ProductImage.objects.filter(
+            product=product,
+        ).count()
+
+        if image_count > 2:
+            raise serializers.ValidationError(
+                "You can only upload 3 images per product"
+            )
+
+        return super().create(validated_data)
+
+
+class ProductImageUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        exclude = ['id', 'product']
+
+
+class SavedProductSerializer(serializers.ModelSerializer):
+    """
+    Serializer for saved products
+    """
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = SavedProduct
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'user']
+        depth = 1
 
 
 class OrderListSerializer(serializers.ModelSerializer):

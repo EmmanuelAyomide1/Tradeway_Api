@@ -1,11 +1,12 @@
 import uuid
-from django.db import models
+
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
 
 from cloudinary_storage.storage import MediaCloudinaryStorage
 
 from account.models import Account
-from django.conf import settings
 
 
 class Category(models.Model):
@@ -33,13 +34,15 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     seller = models.ForeignKey(Account, on_delete=models.CASCADE)
     video = models.FileField(
-        upload_to="products/", storage=MediaCloudinaryStorage(), blank=True, null=True)
+        upload_to="products/",  storage=MediaCloudinaryStorage(), blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     average_rating = models.DecimalField(
         max_digits=3, decimal_places=1, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)]
     )
+    image = models.FileField(upload_to="products/",
+                             storage=MediaCloudinaryStorage())
 
     def __str__(self):
         return f"{self.name} - ${self.current_price}"
@@ -47,7 +50,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(
-        Product, related_name='images', on_delete=models.CASCADE)
+        Product, related_name='extra_images', on_delete=models.CASCADE)
     image = models.FileField(
         upload_to="products/", storage=MediaCloudinaryStorage(), blank=True, null=True)
 
@@ -125,3 +128,19 @@ class ProductReview(models.Model):
 
     class Meta:
         unique_together = ['user', 'product']
+
+
+class SavedProduct(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['user', 'product']
+
+    def __str__(self):
+        return f"{self.user.name} - {self.product.name}"
