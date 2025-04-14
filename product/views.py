@@ -1,12 +1,10 @@
 from operator import is_
-import cloudinary
 
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import OrderFilter
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from rest_framework import viewsets, filters, mixins, generics
+from rest_framework import viewsets, filters, mixins, mixins, generics
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -14,8 +12,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from TradewayBackend.pagination import CustomPagination
 from product.utils import deleteImageInCloudinary
 
-from .models import Category, Product, ProductImage, ProductReview, Order, SavedProduct
+from .filters import OrderFilter
+from .models import CartProduct, Category,  Product, ProductImage, ProductReview, Order, SavedProduct
 from .serializers import (
+    CartProductSerializer,
     CategorySerializer,
     CategoryUpdateSerializer,
     ProductDetailSerializer,
@@ -171,6 +171,23 @@ class ProductReviewViewSet(viewsets.ModelViewSet):
         if self.action in ['retrieve', 'list']:
             return ProductReviewListSerializer
         return super().get_serializer_class()
+
+
+class CartViewset(
+        viewsets.GenericViewSet,
+        mixins.ListModelMixin,
+        mixins.CreateModelMixin,
+        mixins.DestroyModelMixin
+):
+    """
+    ViewSet for managing cart products
+    """
+    queryset = CartProduct.objects.all()
+    serializer_class = CartProductSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['product__name']
 
 
 class ProductViewset(viewsets.ModelViewSet):

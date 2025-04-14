@@ -34,7 +34,7 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     seller = models.ForeignKey(Account, on_delete=models.CASCADE)
     video = models.FileField(
-        upload_to="products/", storage=MediaCloudinaryStorage(), blank=True, null=True)
+        upload_to="products/",  storage=MediaCloudinaryStorage(), blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -58,21 +58,26 @@ class ProductImage(models.Model):
         return f"Image for {self.product.name}"
 
 
-class Carts(models.Model):
+class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    products = models.ManyToManyField(Product, related_name='carts')
+    products = models.ManyToManyField(
+        Product, through='CartProduct')
     buyer = models.OneToOneField(Account, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Cart {self.id} - {self.buyer} "
 
 
-class CartProducts(models.Model):
+class CartProduct(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    cart = models.ForeignKey(Carts, on_delete=models.CASCADE)
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name="cart_products")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']
 
     def __str__(self):
         return f"{self.product.name} x {self.cart.id}"

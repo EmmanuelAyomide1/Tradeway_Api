@@ -1,10 +1,30 @@
-from dataclasses import field
 from django.db import models
+from django.conf import settings
 
 from rest_framework import serializers
 
-from .models import CartProducts, Carts, Category, Product, ProductImage, ProductReview, Order, SavedProduct
+from .models import Cart, CartProduct, Category, Product, ProductImage, ProductReview, Order, SavedProduct
 from .utils import custom_review_handler
+
+
+class UsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = settings.AUTH_USER_MODEL
+        fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Category model
+    """
+    name = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    image = serializers.ImageField(required=True)
+
+    class Meta:
+        model = Category
+        fields = "__all__"
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -137,27 +157,6 @@ class SavedProductSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class CartProductsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CartProducts
-        fields = '__all__'
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Category model
-    """
-    name = serializers.CharField(required=True)
-    description = serializers.CharField(required=True)
-    image = serializers.ImageField(required=True)
-
-    class Meta:
-        model = Category
-        fields = "__all__"
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-
 class OrderListSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True)
 
@@ -168,7 +167,7 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 class CartProductsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CartProducts
+        model = CartProduct
         fields = '__all__'
 
 
@@ -185,10 +184,28 @@ class CategoryUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CartsSerializer(serializers.ModelSerializer):
+class CartProductSerializer(serializers.ModelSerializer):
+
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), required=True)
+
     class Meta:
-        model = Carts
-        fields = '__all__'
+        model = CartProduct
+        exclude = ['cart']
+        depth = 1
+
+    def create(self, validated_data):
+        cart, created = Cart.objects.get_or_create(
+            buyer=self.context['request'].user)
+        validated_data['cart'] = cart
+        return super().create(validated_data)
+
+    def to_representation(self, instance):
+        # Custom representation to include product details
+        product_data = ProductSerializer(instance.product).data
+        cart_product_data = super().to_representation(instance)
+        cart_product_data['product'] = product_data
+        return cart_product_data
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
