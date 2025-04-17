@@ -32,7 +32,8 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", ".render.com", ".now.sh", ".onrender.com","127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", ".render.com",
+                 ".now.sh", ".onrender.com", "127.0.0.1"]
 # ALLOWED_HOSTS = ["localhost", ".vercel.app", "now.sh", "127.0.0.1"]
 # RENDER_EXTERNAL_HOSTNAME = config("RENDER_EXTERNAL_HOSTNAME")
 # ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME) if RENDER_EXTERNAL_HOSTNAME else []
@@ -180,7 +181,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "static")
 
 if (
     not DEBUG
-):  # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+):
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
     # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
     # and renames the files with unique names for each version to support long-term caching
@@ -222,14 +224,14 @@ AUTH_USER_MODEL = "account.Account"
 #     "MAILERSEND_API_TOKEN": config("MAILERSEND_API_KEY"),
 #     "MAILERSEND_SENDER_DOMAIN": config("MAILERSEND_SENDER_DOMAIN"),
 # }
-# DEFAULT_FROM_EMAIL = "info@trial-eqvygm0zjj8l0p7w.mlsender.net"
+# DEFAULT_FROM_EMAIL = "info@tradeway.com.ng"
 
 # EMAIL CONFIG
-EMAIL_HOST=config("EMAIL_HOST")
-EMAIL_HOST_USER=config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD=config("EMAIL_HOST_PASSWORD")
-EMAIL_PORT=config("EMAIL_PORT")
-DEFAULT_FROM_EMAIL="hello@tradeway.com"
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = config("EMAIL_PORT")
+DEFAULT_FROM_EMAIL = "contact@tradeway.com.ng"
 
 # Paystack
-PAYSTACK_SECRET_KEY=config("PAYSTACK_SECRET_KEY")
+PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY")
