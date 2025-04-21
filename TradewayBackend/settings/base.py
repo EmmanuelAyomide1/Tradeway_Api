@@ -37,26 +37,24 @@ ALLOWED_HOSTS = ["localhost", ".render.com",
 # ALLOWED_HOSTS = ["localhost", ".vercel.app", "now.sh", "127.0.0.1"]
 # RENDER_EXTERNAL_HOSTNAME = config("RENDER_EXTERNAL_HOSTNAME")
 # ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME) if RENDER_EXTERNAL_HOSTNAME else []
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://tradeway-web.vercel.app"
-    # "https://frontend.app",
+    "https://tradeway-web.vercel.app",
 ]
 CORS_ORIGIN_WHITELIST = (
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:8000",
-    "https://tradeway-web.vercel.app"
-    # "https://frontend.app",
+    "https://tradeway-web.vercel.app",
 )
 
 CSRF_TRUSTED_ORIGINS = [
-    # "https://frontend.app",
     "https://tradeway-web.vercel.app",
     "https://localhost:3000",
-    "http://localhost:5173"
+    "http://localhost:5173",
 ]
 
 # Application definition
