@@ -40,18 +40,21 @@ ALLOWED_HOSTS = ["localhost", ".render.com",
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "https://tradeway-web.vercel.app"
     # "https://frontend.app",
 ]
 CORS_ORIGIN_WHITELIST = (
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:8000",
+    "https://tradeway-web.vercel.app"
     # "https://frontend.app",
 )
 
 CSRF_TRUSTED_ORIGINS = [
     # "https://frontend.app",
+    "https://tradeway-web.vercel.app",
     "https://localhost:3000",
     "http://localhost:5173"
 ]
